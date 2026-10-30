@@ -17,6 +17,9 @@ dependencies:
   # 3D viewer + "View in your room" (Google Scene Viewer / ARCore on Android)
   model_viewer_plus: ^1.8.0
 
+  # opens Google's AR viewer (Scene Viewer) for "View in your room"
+  android_intent_plus: ^5.0.0
+
   # live camera for the overlay mode
   camera: ^0.11.0+2
   permission_handler: ^11.3.1

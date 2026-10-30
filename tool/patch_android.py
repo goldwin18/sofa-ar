@@ -30,6 +30,7 @@ if "android.permission.CAMERA" not in text:
 
 # --- queries (let the app resolve the AR viewer / browser intents) ----------------------
 queries = (
+    '        <package android:name="com.google.android.googlequicksearchbox"/>\n'
     '        <intent><action android:name="android.intent.action.VIEW"/>'
     '<data android:scheme="https"/></intent>\n'
     '        <intent><action android:name="android.intent.action.VIEW"/>'

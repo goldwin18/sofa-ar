@@ -1,9 +1,11 @@
 import 'models/sofa.dart';
 
-/// The 10 sofas that ship with the app.
+/// The 10 sofas that ship with the app (real photos with the background removed).
 ///
-/// To add another one: drop `sofa_11.glb` into assets/models, `sofa_11.png`
-/// into assets/images, and add a line below.
+/// The prices are placeholders, replace them with your own.
+/// To add another one: drop `sofa_11.png` into assets/images and `sofa_11.glb` into
+/// assets/models (tool/make_sample_glbs.py can build the .glb), then add a line below.
+/// Widths are real-world metres and must match tool/make_sample_glbs.py.
 class SampleSofas {
   SampleSofas._();
 
@@ -20,15 +22,15 @@ class SampleSofas {
   }
 
   static final List<Sofa> all = [
-    _sample('sofa_01', 'Nordic Grey 3-Seater', 'Scandinavian', '₹42,999', 2.10),
-    _sample('sofa_02', 'Velvet Emerald 2-Seater', 'Modern Velvet', '₹36,499', 1.65),
-    _sample('sofa_03', 'Classic Tan Leather 3-Seater', 'Leather', '₹78,500', 2.20),
-    _sample('sofa_04', 'Navy Blue Loveseat', 'Compact', '₹29,999', 1.50),
-    _sample('sofa_05', 'Sand Beige L-Shape Sectional', 'Sectional', '₹64,999', 3.20),
-    _sample('sofa_06', 'Blush Pink Accent Sofa', 'Boho', '₹33,250', 1.80),
-    _sample('sofa_07', 'Charcoal Modern 4-Seater', 'Contemporary', '₹58,750', 2.80),
-    _sample('sofa_08', 'Mustard Retro 2-Seater', 'Mid-century', '₹31,400', 1.70),
-    _sample('sofa_09', 'Ivory Cloud Lounge Sofa', 'Lounge', '₹69,900', 2.40),
-    _sample('sofa_10', 'Teal Sofa with Ottoman', 'Modern', '₹47,800', 2.00),
+    _sample('sofa_01', 'Sunset Orange Channel Sofa', 'Velvet', '₹42,999', 1.70),
+    _sample('sofa_02', 'Orange & Cream Curved Sofa', 'Curved Designer', '₹89,500', 2.60),
+    _sample('sofa_03', 'Navy Blue 3-Seater', 'Modern', '₹39,999', 2.10),
+    _sample('sofa_04', 'Cream Tufted Loveseat', 'Classic', '₹34,750', 1.60),
+    _sample('sofa_05', 'Emerald Velvet Sofa', 'Luxury Velvet', '₹56,999', 1.90),
+    _sample('sofa_06', 'Ivory Channel 3-Seater', 'Contemporary', '₹72,400', 2.30),
+    _sample('sofa_07', 'Natural Wood Frame Sofa', 'Scandinavian', '₹48,250', 2.00),
+    _sample('sofa_08', 'Tan Leather Recliner', 'Leather', '₹84,900', 1.85),
+    _sample('sofa_09', 'Grey Bouclé Curved Sofa', 'Bouclé', '₹78,300', 2.30),
+    _sample('sofa_10', 'Sage Teal 2-Seater', 'Mid-century', '₹37,600', 1.70),
   ];
 }

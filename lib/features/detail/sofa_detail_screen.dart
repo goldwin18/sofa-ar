@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/utils/app_navigator.dart';
+import '../../core/utils/snack.dart';
+import '../../services/ar_launcher.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/sofa_image.dart';
 import '../../data/models/sofa.dart';
@@ -44,9 +46,16 @@ class SofaDetailScreen extends StatelessWidget {
           SofaInfoPanel(
             sofa: sofa,
             actions: [
+              if (sofa.hasModel)
+                AppButton(
+                  label: 'View in your room (AR)',
+                  icon: Icons.view_in_ar,
+                  onPressed: () => _openAr(context, sofa),
+                ),
               AppButton(
                 label: 'Try with camera (overlay)',
                 icon: Icons.photo_camera_outlined,
+                outlined: true,
                 onPressed: () => AppNavigator.openCamera(context, sofa.id),
               ),
               if (!sofa.isAsset)
@@ -61,6 +70,14 @@ class SofaDetailScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openAr(BuildContext context, Sofa sofa) async {
+    try {
+      await ArLauncher.launch(sofa);
+    } on ArException catch (e) {
+      if (context.mounted) showSnack(context, e.message);
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context, Sofa sofa) async {
