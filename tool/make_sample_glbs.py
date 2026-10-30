@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Builds assets/models/sofa_XX.glb from assets/images/sofa_XX.png.
 
-Each model is a real-size, upright cut-out of the photo (transparent parts are cut away),
+Each model is a real-size, upright, 4 cm thick cut-out of the photo (transparent parts are cut away),
 the same thing the in-app "Quick 3D cut-out" makes. For a full 3D shape, convert the photo
 with the AI option (Meshy) and drop the resulting .glb into assets/models/ under the same name.
 
@@ -29,12 +29,17 @@ def pad(data: bytes, fill: bytes) -> bytes:
     return data + fill * ((4 - len(data) % 4) % 4)
 
 
+DEPTH = 0.04  # metres. A little thickness keeps AR apps from choking on a perfectly flat model.
+
+
 def quad_glb(png: bytes, width: float, height: float) -> bytes:
-    h = width / 2
-    pos = struct.pack("<12f", -h, 0, 0, h, 0, 0, h, height, 0, -h, height, 0)
-    nor = struct.pack("<12f", *([0, 0, 1] * 4))
-    uv = struct.pack("<8f", 0, 1, 1, 1, 1, 0, 0, 0)
-    idx = struct.pack("<6H", 0, 1, 2, 0, 2, 3)
+    h, d = width / 2, DEPTH / 2
+    front = [-h, 0, d, h, 0, d, h, height, d, -h, height, d]
+    back = [-h, 0, -d, h, 0, -d, h, height, -d, -h, height, -d]
+    pos = struct.pack("<24f", *front, *back)
+    nor = struct.pack("<24f", *([0, 0, 1] * 4), *([0, 0, -1] * 4))
+    uv = struct.pack("<16f", *([0, 1, 1, 1, 1, 0, 0, 0] * 2))
+    idx = struct.pack("<12H", 0, 1, 2, 0, 2, 3, 4, 6, 5, 4, 7, 6)
 
     binary, views = b"", []
     for data, target in ((pos, 34962), (nor, 34962), (uv, 34962), (idx, 34963), (png, None)):
@@ -56,11 +61,11 @@ def quad_glb(png: bytes, width: float, height: float) -> bytes:
         "samplers": [{"magFilter": 9729, "minFilter": 9987, "wrapS": 33071, "wrapT": 33071}],
         "images": [{"bufferView": 4, "mimeType": "image/png"}],
         "accessors": [
-            {"bufferView": 0, "componentType": 5126, "count": 4, "type": "VEC3",
-             "min": [-h, 0, 0], "max": [h, height, 0]},
-            {"bufferView": 1, "componentType": 5126, "count": 4, "type": "VEC3"},
-            {"bufferView": 2, "componentType": 5126, "count": 4, "type": "VEC2"},
-            {"bufferView": 3, "componentType": 5123, "count": 6, "type": "SCALAR"},
+            {"bufferView": 0, "componentType": 5126, "count": 8, "type": "VEC3",
+             "min": [-h, 0, -d], "max": [h, height, d]},
+            {"bufferView": 1, "componentType": 5126, "count": 8, "type": "VEC3"},
+            {"bufferView": 2, "componentType": 5126, "count": 8, "type": "VEC2"},
+            {"bufferView": 3, "componentType": 5123, "count": 12, "type": "SCALAR"},
         ],
         "bufferViews": views, "buffers": [{"byteLength": len(binary)}],
     }

@@ -9,24 +9,30 @@ class GlbBuilder {
   static const _jsonChunk = 0x4E4F534A; // "JSON"
   static const _binChunk = 0x004E4942; // "BIN\0"
 
-  /// A flat, upright rectangle (bottom edge on the floor) showing [png] on both sides.
-  /// Transparent parts of the PNG are cut away. Sizes are in metres.
+  /// An upright, thin slab (bottom edge on the floor) showing [png] on front and back.
+  /// Transparent parts of the PNG are cut away. Sizes are in metres. The small
+  /// thickness stops AR apps from rejecting a perfectly flat model.
   static Uint8List texturedQuad({
     required Uint8List png,
     required double widthMeters,
     required double heightMeters,
+    double depthMeters = 0.04,
   }) {
     final half = widthMeters / 2;
+    final d = depthMeters / 2;
 
     final positions = Float32List.fromList([
-      -half, 0, 0,
-      half, 0, 0,
-      half, heightMeters, 0,
-      -half, heightMeters, 0,
+      // front face
+      -half, 0, d, half, 0, d, half, heightMeters, d, -half, heightMeters, d,
+      // back face
+      -half, 0, -d, half, 0, -d, half, heightMeters, -d, -half, heightMeters, -d,
     ]);
-    final normals = Float32List.fromList([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]);
-    final uvs = Float32List.fromList([0, 1, 1, 1, 1, 0, 0, 0]);
-    final indices = Uint16List.fromList([0, 1, 2, 0, 2, 3]);
+    final normals = Float32List.fromList([
+      0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, //
+      0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+    ]);
+    final uvs = Float32List.fromList([0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0]);
+    final indices = Uint16List.fromList([0, 1, 2, 0, 2, 3, 4, 6, 5, 4, 7, 6]);
 
     // Binary chunk: every piece starts on a 4-byte boundary, as glTF requires.
     final bin = BytesBuilder();
@@ -97,14 +103,14 @@ class GlbBuilder {
         {
           'bufferView': posView,
           'componentType': 5126,
-          'count': 4,
+          'count': 8,
           'type': 'VEC3',
-          'min': [-half, 0, 0],
-          'max': [half, heightMeters, 0],
+          'min': [-half, 0, -d],
+          'max': [half, heightMeters, d],
         },
-        {'bufferView': normView, 'componentType': 5126, 'count': 4, 'type': 'VEC3'},
-        {'bufferView': uvView, 'componentType': 5126, 'count': 4, 'type': 'VEC2'},
-        {'bufferView': idxView, 'componentType': 5123, 'count': 6, 'type': 'SCALAR'},
+        {'bufferView': normView, 'componentType': 5126, 'count': 8, 'type': 'VEC3'},
+        {'bufferView': uvView, 'componentType': 5126, 'count': 8, 'type': 'VEC2'},
+        {'bufferView': idxView, 'componentType': 5123, 'count': 12, 'type': 'SCALAR'},
       ],
       'bufferViews': views,
       'buffers': [

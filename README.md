@@ -37,6 +37,7 @@ served from this GitHub repo through jsDelivr:
 
 - The repo must be **public** (or change `hostedModelsBaseUrl` in `lib/core/constants/app_constants.dart`
   to wherever you host the models).
+- If the AR viewer opens and closes straight away, it could not load the model. The app now tests the link first and shows the error. If you see a 404 right after making the repo public, clear jsDelivr's cache by opening `https://purge.jsdelivr.net/gh/goldwin18/sofa-ar@main/assets/models/sofa_04.glb` once in a browser (repeat for other files), or wait a few hours.
 - Open that link in a browser to check: it should download the file. jsDelivr can take a few minutes to
   see new commits, and keeps `@main` cached for up to ~12 hours.
 - Models you create inside the app live only on the phone, so AR is not available for them until

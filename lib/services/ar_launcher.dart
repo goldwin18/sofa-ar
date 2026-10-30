@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 import '../core/constants/app_constants.dart';
 import '../data/models/sofa.dart';
@@ -40,6 +44,8 @@ class ArLauncher {
       );
     }
 
+    await _checkModelIsReachable(modelUrl);
+
     final viewerUri = Uri.https('arvr.google.com', '/scene-viewer/1.0', {
       'file': modelUrl.toString(),
       'mode': 'ar_preferred',
@@ -62,6 +68,24 @@ class ArLauncher {
         '"Google Play Services for AR" are installed and up to date, and that '
         'this phone supports ARCore.',
       );
+    }
+  }
+
+  /// Google's viewer closes silently when it cannot download the model, so we test the link
+  /// first and show the real reason instead.
+  static Future<void> _checkModelIsReachable(Uri url) async {
+    try {
+      final response = await http.head(url).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) {
+        throw ArException(
+          'The 3D model could not be downloaded (error ${response.statusCode}).\n'
+          'Make sure the GitHub repo is public and the file is pushed:\n$url',
+        );
+      }
+    } on TimeoutException {
+      throw ArException('The model download timed out. Check your internet connection.');
+    } on SocketException {
+      throw ArException('No internet connection. AR needs to download the 3D model.');
     }
   }
 }
