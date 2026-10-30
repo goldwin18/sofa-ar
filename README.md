@@ -33,11 +33,11 @@ flutter build apk --release     # build/app/outputs/flutter-apk/app-release.apk
 Google's AR viewer only loads models from a **public https link**, so the sample `.glb` files are
 served from this GitHub repo through jsDelivr:
 
-`https://cdn.jsdelivr.net/gh/goldwin18/sofa-ar@main/assets/models/sofa_01.glb`
+`https://cdn.jsdelivr.net/gh/goldwin18/sofa-ar@main/assets/models/sofa_01_r2.glb`
 
 - The repo must be **public** (or change `hostedModelsBaseUrl` in `lib/core/constants/app_constants.dart`
   to wherever you host the models).
-- If the AR viewer opens and closes straight away, it could not load the model. The app now tests the link first and shows the error. If you see a 404 right after making the repo public, clear jsDelivr's cache by opening `https://purge.jsdelivr.net/gh/goldwin18/sofa-ar@main/assets/models/sofa_04.glb` once in a browser (repeat for other files), or wait a few hours.
+- If the AR viewer opens and closes straight away, it could not load the model. The app now tests the link first and shows the error. If you see a 404 right after making the repo public, clear jsDelivr's cache by opening `https://purge.jsdelivr.net/gh/goldwin18/sofa-ar@main/assets/models/sofa_04.glb` once in a browser (repeat for other files), or wait a few hours. The model files carry a revision in their name (`sofa_01_r2.glb`) so a changed model always gets a new link; raise the revision when you rebuild them (see `lib/data/sample_sofas.dart`).
 - Open that link in a browser to check: it should download the file. jsDelivr can take a few minutes to
   see new commits, and keeps `@main` cached for up to ~12 hours.
 - Models you create inside the app live only on the phone, so AR is not available for them until
@@ -66,9 +66,9 @@ tool/                                 patch_android.py, make_sample_sofas.py
 
 ## Common tasks
 
-- **Add a sample sofa:** put `sofa_11.glb` in `assets/models/`, `sofa_11.png` in `assets/images/`, add one line in `lib/data/sample_sofas.dart`.
-- **Better sofa models:** replace any `.glb` in `assets/models/` with a real scanned/designed model. Keep the same file name. Models should be in metres.
-- **Change a sample photo:** replace `assets/images/sofa_XX.png` (transparent background), then run `python3 tool/make_sample_glbs.py` to rebuild its `.glb`.
+- **Add a sample sofa:** put `sofa_11_r2.glb` in `assets/models/`, `sofa_11.png` in `assets/images/`, add one line in `lib/data/sample_sofas.dart`.
+- **Better sofa models:** replace any `.glb` in `assets/models/` with a real scanned/designed model. Keep the same file name (with the `_rN` revision). Models should be in metres.
+- **Change a sample photo:** replace `assets/images/sofa_XX.png` (transparent background), raise `REVISION` in `tool/make_sample_glbs.py` and `modelRevision` in `lib/data/sample_sofas.dart`, then run `python3 tool/make_sample_glbs.py` to rebuild the `.glb` files.
 - **Add another 3D converter (Tripo, Luma, your own server):** implement `ImageTo3dService` and add it to `converter_registry.dart`.
 - **Change colours:** `lib/core/theme/app_theme.dart`.
 

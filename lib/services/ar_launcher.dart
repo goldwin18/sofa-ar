@@ -35,6 +35,11 @@ class ArLauncher {
     return Uri.parse('${AppConstants.hostedModelsBaseUrl}/$fileName');
   }
 
+  /// A standard Google sample model. If AR works with this one but not with a sofa,
+  /// the problem is the sofa file; if it fails too, the problem is this phone's AR setup.
+  static final testModelUrl =
+      Uri.parse('https://modelviewer.dev/shared-assets/models/Astronaut.glb');
+
   static Future<void> launch(Sofa sofa) async {
     final modelUrl = hostedModelUrl(sofa);
     if (modelUrl == null) {
@@ -43,14 +48,18 @@ class ArLauncher {
         'uploaded yet. Use the 3D viewer or the camera overlay for this sofa.',
       );
     }
+    await openViewer(modelUrl, title: sofa.name);
+  }
 
+  /// Opens Scene Viewer for any public https .glb link.
+  static Future<void> openViewer(Uri modelUrl, {required String title, bool resizable = false}) async {
     await _checkModelIsReachable(modelUrl);
 
     final viewerUri = Uri.https('arvr.google.com', '/scene-viewer/1.0', {
       'file': modelUrl.toString(),
       'mode': 'ar_preferred',
-      'title': sofa.name,
-      'resizable': 'false', // keep true-to-size
+      'title': title,
+      'resizable': resizable.toString(), // false keeps the sofa true-to-size
     });
 
     final intent = AndroidIntent(

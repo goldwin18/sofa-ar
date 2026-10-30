@@ -6,8 +6,14 @@ import 'models/sofa.dart';
 /// To add another one: drop `sofa_11.png` into assets/images and `sofa_11.glb` into
 /// assets/models (tool/make_sample_glbs.py can build the .glb), then add a line below.
 /// Widths are real-world metres and must match tool/make_sample_glbs.py.
+///
+/// MODEL REVISION: the AR viewer downloads the models through a CDN that keeps old copies
+/// for hours. So whenever you change a model, raise [modelRevision] here AND `REVISION` in
+/// tool/make_sample_glbs.py (the file name changes, so the CDN can never serve a stale copy).
 class SampleSofas {
   SampleSofas._();
+
+  static const modelRevision = 2;
 
   static Sofa _sample(String id, String name, String style, String price, double width) {
     return Sofa(
@@ -17,7 +23,7 @@ class SampleSofas {
       price: price,
       widthMeters: width,
       imagePath: 'assets/images/$id.png',
-      modelPath: 'assets/models/$id.glb',
+      modelPath: 'assets/models/${id}_r$modelRevision.glb',
     );
   }
 

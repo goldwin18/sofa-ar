@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/snack.dart';
 import '../../core/widgets/app_button.dart';
+import '../../services/ar_launcher.dart';
 import '../../services/settings_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -34,6 +35,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted) showSnack(context, 'Saved.');
   }
 
+  Future<void> _testAr() async {
+    try {
+      await ArLauncher.openViewer(ArLauncher.testModelUrl, title: 'AR test', resizable: true);
+    } on ArException catch (e) {
+      if (mounted) showSnack(context, e.message);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +66,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 16),
           AppButton(label: 'Save', icon: Icons.check, onPressed: _save),
+          const SizedBox(height: 32),
+          Text('Troubleshooting', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          const Text(
+            'Opens Google\'s AR viewer with a standard sample model (an astronaut). '
+            'If it works, AR is fine on this phone. If it also closes straight away, '
+            'update "Google Play Services for AR" and the Google app in the Play Store.',
+          ),
+          const SizedBox(height: 12),
+          AppButton(
+            label: 'Test AR on this phone',
+            icon: Icons.view_in_ar,
+            outlined: true,
+            onPressed: _testAr,
+          ),
           const SizedBox(height: 24),
           const Text(
             'Note: the key is stored on this phone. For a public release, call Meshy from '

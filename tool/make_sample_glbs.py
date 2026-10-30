@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Builds assets/models/sofa_XX.glb from assets/images/sofa_XX.png.
+"""Builds assets/models/sofa_XX_rN.glb from assets/images/sofa_XX.png.
 
 Each model is a real-size, upright, 4 cm thick cut-out of the photo (transparent parts are cut away),
 the same thing the in-app "Quick 3D cut-out" makes. For a full 3D shape, convert the photo
 with the AI option (Meshy) and drop the resulting .glb into assets/models/ under the same name.
 
 Usage:  python3 tool/make_sample_glbs.py
-Keep the WIDTHS below in sync with lib/data/sample_sofas.dart.
+Keep WIDTHS and REVISION below in sync with lib/data/sample_sofas.dart.
 """
 import json
 import struct
@@ -17,6 +17,9 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 IMAGES = ROOT / "assets/images"
 MODELS = ROOT / "assets/models"
+
+# Raise this whenever the models change (and in sample_sofas.dart): new file name = no stale CDN copy.
+REVISION = 2
 
 # real-world width of each sofa in metres
 WIDTHS = {
@@ -79,5 +82,8 @@ for sofa_id, width in WIDTHS.items():
     image_path = IMAGES / f"{sofa_id}.png"
     w, h = Image.open(image_path).size
     glb = quad_glb(image_path.read_bytes(), width, width * h / w)
-    (MODELS / f"{sofa_id}.glb").write_bytes(glb)
-    print(f"{sofa_id}.glb  {width:.2f} m wide  {len(glb) // 1024} KB")
+    for old in MODELS.glob(f"{sofa_id}*.glb"):  # remove earlier revisions
+        old.unlink()
+    name = f"{sofa_id}_r{REVISION}.glb"
+    (MODELS / name).write_bytes(glb)
+    print(f"{name}  {width:.2f} m wide  {len(glb) // 1024} KB")
