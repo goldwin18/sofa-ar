@@ -74,3 +74,10 @@ def test_old_order_would_not_have_used_chromes_ar(open_page):
     page.click(".ar-button")
     page.wait_for_timeout(2500)
     assert page.evaluate("window.__xr.calls.length") == 0
+
+
+def test_resizing_is_on_by_default_and_can_be_locked(open_page):
+    page, _ = open_page(f"model=sofa_04_r{revision()}")
+    assert page.get_attribute("#viewer", "ar-scale") == "auto"
+    page, _ = open_page(f"model=sofa_04_r{revision()}&scale=fixed")
+    assert page.get_attribute("#viewer", "ar-scale") == "fixed"

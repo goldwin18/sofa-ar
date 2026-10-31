@@ -42,6 +42,7 @@ directly from the app made the Google app crash, "Google keeps stopping", on a R
 3. Check it on the phone in Chrome: `https://goldwin18.github.io/sofa-ar/ar.html?model=astronaut`
    (Google's test model) and `https://goldwin18.github.io/sofa-ar/ar.html?model=sofa_04_r2`.
 
+In AR: tap to place on the floor, drag with one finger to move, twist with two fingers to turn, pinch to resize.
 To test one route on its own, add `&modes=webxr` or `&modes=scene-viewer` to the page address.
 If AR closes with "Google keeps stopping", Chrome's own AR could not start and the page fell back to
 Google's viewer: update Chrome, allow its camera permission, and try `&modes=webxr`.
@@ -90,7 +91,7 @@ tool/                                 patch_android.py, make_sample_sofas.py
 - *Quick 3D cut-out* is a flat standing picture, not a real sofa shape. For a true 3D shape use the AI option.
 - Background removal only handles plain white / light-grey backgrounds.
 - The Meshy API key is stored on the phone. For a public release, route calls through your own server.
-- AR scale is fixed so customers see the true size of the sofa.
+- In AR the sofa starts at its true size and can be pinched bigger or smaller. For a true-size-only view add `&scale=fixed` to the page address.
 
 ## Tests
 

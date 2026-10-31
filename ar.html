@@ -15,6 +15,7 @@
     On some phones the Google app crashes when it starts Scene Viewer ("Google keeps stopping"),
     while WebXR does not use the Google app at all. To force one route while testing, add
       &modes=webxr          or          &modes=scene-viewer
+    Pinch-to-resize is on. To lock the sofa to its true size (honest fit check), add &scale=fixed
   -->
   <script type="module"
           src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
@@ -28,7 +29,7 @@
 
     header { padding: 14px 16px 6px; }
     h1 { margin: 0; font-size: 18px; font-weight: 700; }
-    #hint { margin: 2px 0 0; font-size: 13px; opacity: .75; }
+    #hint { margin: 2px 0 0; font-size: 13px; line-height: 1.35; opacity: .75; }
 
     model-viewer { flex: 1; width: 100%; min-height: 0; --poster-color: transparent; }
 
@@ -45,7 +46,7 @@
 <body>
   <header>
     <h1 id="title">Loading…</h1>
-    <p id="hint">Drag to rotate. Tap the button to place it in your room.</p>
+    <p id="hint">Drag to rotate. Tap the button, then slowly move your phone over the floor until a ring appears and tap to place the sofa. Then: drag with one finger to move it, twist with two fingers to turn it, pinch to resize.</p>
   </header>
 
   <model-viewer
@@ -56,7 +57,7 @@
       ar
       ar-modes="webxr scene-viewer"
       ar-placement="floor"
-      ar-scale="fixed">
+      ar-scale="auto">
     <button slot="ar-button" class="ar-button">View in your room</button>
   </model-viewer>
 
@@ -74,6 +75,8 @@
     // Optional ?modes=webxr or ?modes=scene-viewer (testing). Default: WebXR first.
     const wanted = (params.get("modes") || "").split(/[ ,]+/).filter((m) => m === "webxr" || m === "scene-viewer");
     if (wanted.length) viewer.setAttribute("ar-modes", wanted.join(" "));
+
+    if (params.get("scale") === "fixed") viewer.setAttribute("ar-scale", "fixed");
 
     const statusEl = document.getElementById("status");
     const say = (text, isError = false) => {
