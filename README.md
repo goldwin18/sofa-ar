@@ -8,7 +8,7 @@ standing there in real size. Works with 10 sample sofas, and you can add your ow
 | Feature | What it does |
 |---|---|
 | **3D viewer** | Rotate any sofa with your finger. |
-| **View in your room (AR)** | Button inside the viewer. Opens Google's AR viewer (ARCore), places the sofa on the floor at true size. Same idea as Amazon's feature. |
+| **View in your room (AR)** | Opens a page in Chrome with the sofa in 3D; its button starts Google's AR viewer (ARCore) and places the sofa on the floor at true size. Same idea as Amazon's feature. |
 | **Camera overlay** | Opens the live camera with the sofa picture on top. Drag, pinch to resize, twist to rotate, flip, swap sofas, and share a screenshot. Works on every phone and with any photo. |
 | **10 sample sofas** | Real sofa photos (background removed) + a real-size `.glb` for each in `assets/`. The sample `.glb` files are flat photo cut-outs, not full 3D shapes. |
 | **Add your own sofa** | Pick a photo, plain background is removed automatically, set name / price / real width. |
@@ -28,24 +28,36 @@ flutter run                     # run on a connected phone
 flutter build apk --release     # build/app/outputs/flutter-apk/app-release.apk
 ```
 
-## Making "View in your room" work
+## Making "View in your room" work (one-time setup)
 
-Google's AR viewer only loads models from a **public https link**, so the sample `.glb` files are
-served from this GitHub repo through jsDelivr:
+The AR button opens `ar.html` in Chrome. That page shows the sofa in 3D with a **View in your room**
+button. Chrome's own AR (WebXR) is tried first, Google's Scene Viewer second. (Starting Scene Viewer
+directly from the app made the Google app crash, "Google keeps stopping", on a Redmi Note 10 Pro.) The page and the `.glb` models are served for free by
+**GitHub Pages**:
 
-`https://cdn.jsdelivr.net/gh/goldwin18/sofa-ar@main/assets/models/sofa_01_r2.glb`
+1. Make the repo **public**.
+2. GitHub repo -> **Settings -> Pages**. Under *Build and deployment* choose **Deploy from a branch**,
+   branch **main**, folder **/ (root)**, then **Save**. After about a minute the page is live at
+   `https://goldwin18.github.io/sofa-ar/ar.html`.
+3. Check it on the phone in Chrome: `https://goldwin18.github.io/sofa-ar/ar.html?model=astronaut`
+   (Google's test model) and `https://goldwin18.github.io/sofa-ar/ar.html?model=sofa_04_r2`.
 
-- The repo must be **public** (or change `hostedModelsBaseUrl` in `lib/core/constants/app_constants.dart`
-  to wherever you host the models).
-- If the AR viewer opens and closes straight away, it could not load the model. The app now tests the link first and shows the error. If you see a 404 right after making the repo public, clear jsDelivr's cache by opening `https://purge.jsdelivr.net/gh/goldwin18/sofa-ar@main/assets/models/sofa_04.glb` once in a browser (repeat for other files), or wait a few hours. The model files carry a revision in their name (`sofa_01_r2.glb`) so a changed model always gets a new link; raise the revision when you rebuild them (see `lib/data/sample_sofas.dart`).
-- Open that link in a browser to check: it should download the file. jsDelivr can take a few minutes to
-  see new commits, and keeps `@main` cached for up to ~12 hours.
-- Models you create inside the app live only on the phone, so AR is not available for them until
-  there is somewhere to upload them (planned with the backend step).
+To test one route on its own, add `&modes=webxr` or `&modes=scene-viewer` to the page address.
+If AR closes with "Google keeps stopping", Chrome's own AR could not start and the page fell back to
+Google's viewer: update Chrome, allow its camera permission, and try `&modes=webxr`.
+
+If you host the page somewhere else, change `arPageUrl` in `lib/core/constants/app_constants.dart`.
+**Settings -> Test AR on this phone** in the app opens the astronaut test.
+
+Models you create inside the app live only on the phone, so AR is not available for them until
+there is somewhere to upload them (planned with the backend step). The camera overlay works for them.
+
+The model files carry a revision in their name (`sofa_01_r2.glb`) so a changed model always gets a
+new link; raise the revision when you rebuild them (see `lib/data/sample_sofas.dart`).
 
 ## Phone requirements for AR
-Android 8+ with **Google Play Services for AR** (ARCore). Most phones from the last few years have it.
-If the AR button doesn't show, the phone doesn't support ARCore; use the camera overlay instead.
+Android 8+ with **Chrome** and **Google Play Services for AR** (ARCore). Most phones from the last few years have it.
+If the page says AR is not available, the phone doesn't support ARCore; use the camera overlay instead.
 
 ## Code layout
 
@@ -79,3 +91,16 @@ tool/                                 patch_android.py, make_sample_sofas.py
 - Background removal only handles plain white / light-grey backgrounds.
 - The Meshy API key is stored on the phone. For a public release, route calls through your own server.
 - AR scale is fixed so customers see the true size of the sofa.
+
+## Tests
+
+`tests/` checks the sample models byte by byte (valid glTF, real size, standing on the floor, picture
+matches), that the Dart settings and `tool/make_sample_glbs.py` agree, and opens `ar.html` in a real
+browser, including a fake Android phone with Chrome's AR, to make sure Chrome's own AR is tried first.
+
+```bash
+./tests/run_tests.sh        # makes .venv, installs pytest + Playwright, runs everything
+```
+
+Needs Python 3.9+ and internet on the first run. Real AR (camera, floor detection) and the Dart code
+itself can only be checked on a phone and by the **Build APK** workflow.

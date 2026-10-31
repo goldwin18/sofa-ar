@@ -1,10 +1,6 @@
-import 'dart:async';
-import 'dart:io';
-
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 
 import '../core/constants/app_constants.dart';
 import '../data/models/sofa.dart';
@@ -17,84 +13,59 @@ class ArException implements Exception {
   String toString() => message;
 }
 
-/// Opens Google's AR viewer (Scene Viewer / ARCore) so the sofa can be placed on the floor.
+/// "View in your room": opens a small web page in Chrome that shows the sofa in 3D and has
+/// the AR button (the page is `ar.html`, hosted by GitHub Pages with the models).
 ///
-/// Scene Viewer only loads models from a public https link, so the model has to be
-/// hosted online. The sample sofas are served from the GitHub repo through jsDelivr
-/// (see [AppConstants.hostedModelsBaseUrl]).
+/// Starting Google's AR viewer straight from the app failed on a real phone (it opened and
+/// closed at once), while the same viewer started from Chrome worked, so we hand over to Chrome.
 class ArLauncher {
   ArLauncher._();
 
-  static const _googleAppPackage = 'com.google.android.googlequicksearchbox';
+  static const _chromePackage = 'com.android.chrome';
 
-  /// The public link for a sofa's model, or null if it is only stored on this phone.
-  static Uri? hostedModelUrl(Sofa sofa) {
+  /// The page for a sample sofa, or null if its model only exists on this phone
+  /// (the page can only load models that are hosted online).
+  static Uri? pageFor(Sofa sofa) {
     final path = sofa.modelPath;
     if (path == null || !sofa.isAsset) return null;
-    final fileName = path.split('/').last;
-    return Uri.parse('${AppConstants.hostedModelsBaseUrl}/$fileName');
+    final modelName = path.split('/').last.replaceAll('.glb', '');
+    return Uri.parse(AppConstants.arPageUrl).replace(
+      queryParameters: {'model': modelName, 'title': sofa.name},
+    );
   }
 
-  /// A standard Google sample model. If AR works with this one but not with a sofa,
-  /// the problem is the sofa file; if it fails too, the problem is this phone's AR setup.
-  static final testModelUrl =
-      Uri.parse('https://modelviewer.dev/shared-assets/models/Astronaut.glb');
-
   static Future<void> launch(Sofa sofa) async {
-    final modelUrl = hostedModelUrl(sofa);
-    if (modelUrl == null) {
+    final page = pageFor(sofa);
+    if (page == null) {
       throw ArException(
         'AR needs the 3D model to be online, and models you create on the phone are not '
         'uploaded yet. Use the 3D viewer or the camera overlay for this sofa.',
       );
     }
-    await openViewer(modelUrl, title: sofa.name);
+    await _openInBrowser(page);
   }
 
-  /// Opens Scene Viewer for any public https .glb link.
-  static Future<void> openViewer(Uri modelUrl, {required String title, bool resizable = false}) async {
-    await _checkModelIsReachable(modelUrl);
-
-    final viewerUri = Uri.https('arvr.google.com', '/scene-viewer/1.0', {
-      'file': modelUrl.toString(),
-      'mode': 'ar_preferred',
-      'title': title,
-      'resizable': resizable.toString(), // false keeps the sofa true-to-size
-    });
-
-    final intent = AndroidIntent(
-      action: 'android.intent.action.VIEW',
-      data: viewerUri.toString(),
-      package: _googleAppPackage,
-      flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
-    );
-
-    try {
-      await intent.launch();
-    } on PlatformException {
-      throw ArException(
-        'Could not open the AR viewer. Make sure the Google app and '
-        '"Google Play Services for AR" are installed and up to date, and that '
-        'this phone supports ARCore.',
-      );
-    }
+  /// Opens the same page with a standard sample model (an astronaut) to check AR on this phone.
+  static Future<void> launchTest() {
+    return _openInBrowser(Uri.parse(AppConstants.arPageUrl)
+        .replace(queryParameters: {'model': 'astronaut', 'title': 'AR test'}));
   }
 
-  /// Google's viewer closes silently when it cannot download the model, so we test the link
-  /// first and show the real reason instead.
-  static Future<void> _checkModelIsReachable(Uri url) async {
-    try {
-      final response = await http.head(url).timeout(const Duration(seconds: 10));
-      if (response.statusCode != 200) {
-        throw ArException(
-          'The 3D model could not be downloaded (error ${response.statusCode}).\n'
-          'Make sure the GitHub repo is public and the file is pushed:\n$url',
-        );
+  static Future<void> _openInBrowser(Uri url) async {
+    // Chrome first (it starts Google's AR viewer), then whatever browser the phone has.
+    for (final package in [_chromePackage, null]) {
+      try {
+        await AndroidIntent(
+          action: 'android.intent.action.VIEW',
+          data: url.toString(),
+          package: package,
+          flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
+        ).launch();
+        return;
+      } on PlatformException {
+        continue; // Chrome missing: try the next option
       }
-    } on TimeoutException {
-      throw ArException('The model download timed out. Check your internet connection.');
-    } on SocketException {
-      throw ArException('No internet connection. AR needs to download the 3D model.');
     }
+    throw ArException('Could not open a web browser. Install Chrome and try again.');
   }
 }

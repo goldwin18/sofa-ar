@@ -37,7 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _testAr() async {
     try {
-      await ArLauncher.openViewer(ArLauncher.testModelUrl, title: 'AR test', resizable: true);
+      await ArLauncher.launchTest();
     } on ArException catch (e) {
       if (mounted) showSnack(context, e.message);
     }
@@ -70,9 +70,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Text('Troubleshooting', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           const Text(
-            'Opens Google\'s AR viewer with a standard sample model (an astronaut). '
-            'If it works, AR is fine on this phone. If it also closes straight away, '
-            'update "Google Play Services for AR" and the Google app in the Play Store.',
+            'Opens the AR page in Chrome with a standard sample model (an astronaut). '
+            'Tap "View in your room" there. If the page says it cannot load, check that '
+            'GitHub Pages is turned on for the repo (see README).',
           ),
           const SizedBox(height: 12),
           AppButton(

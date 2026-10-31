@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>View in your room</title>
+
+  <!--
+    "View in your room" page. The Flutter app opens this in Chrome:
+      ar.html?model=sofa_04_r2&title=Cream%20Loveseat      (a sample sofa)
+      ar.html?model=astronaut                              (a test model from Google)
+    Hosted by GitHub Pages together with the .glb files in assets/models/.
+
+    AR route: Chrome's built-in AR (WebXR) is tried FIRST, Google's Scene Viewer second.
+    On some phones the Google app crashes when it starts Scene Viewer ("Google keeps stopping"),
+    while WebXR does not use the Google app at all. To force one route while testing, add
+      &modes=webxr          or          &modes=scene-viewer
+  -->
+  <script type="module"
+          src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+
+  <style>
+    :root { --brand: #8B5E3C; --bg: #F1ECE5; --ink: #2b2118; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--ink);
+                 font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    body { display: flex; flex-direction: column; }
+
+    header { padding: 14px 16px 6px; }
+    h1 { margin: 0; font-size: 18px; font-weight: 700; }
+    #hint { margin: 2px 0 0; font-size: 13px; opacity: .75; }
+
+    model-viewer { flex: 1; width: 100%; min-height: 0; --poster-color: transparent; }
+
+    .ar-button {
+      position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%);
+      background: var(--brand); color: #fff; border: 0; border-radius: 28px;
+      padding: 15px 28px; font-size: 16px; font-weight: 600; white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .3);
+    }
+    #status { margin: 0; padding: 12px 16px 20px; font-size: 14px; text-align: center; min-height: 20px; }
+    #status.error { color: #b3261e; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="title">Loading…</h1>
+    <p id="hint">Drag to rotate. Tap the button to place it in your room.</p>
+  </header>
+
+  <model-viewer
+      id="viewer"
+      camera-controls
+      auto-rotate
+      shadow-intensity="1"
+      ar
+      ar-modes="webxr scene-viewer"
+      ar-placement="floor"
+      ar-scale="fixed">
+    <button slot="ar-button" class="ar-button">View in your room</button>
+  </model-viewer>
+
+  <p id="status"></p>
+
+  <script type="module">
+    const TEST_MODEL = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
+
+    const params = new URLSearchParams(location.search);
+    const id = (params.get("model") || "").replace(/[^a-zA-Z0-9_\-]/g, "");
+    const title = params.get("title") || (id === "astronaut" ? "AR test" : "Your sofa");
+
+    const viewer = document.getElementById("viewer");
+
+    // Optional ?modes=webxr or ?modes=scene-viewer (testing). Default: WebXR first.
+    const wanted = (params.get("modes") || "").split(/[ ,]+/).filter((m) => m === "webxr" || m === "scene-viewer");
+    if (wanted.length) viewer.setAttribute("ar-modes", wanted.join(" "));
+
+    const statusEl = document.getElementById("status");
+    const say = (text, isError = false) => {
+      statusEl.textContent = text;
+      statusEl.className = isError ? "error" : "";
+    };
+
+    document.getElementById("title").textContent = title;
+    document.title = title;
+
+    if (!id) {
+      say("No model chosen. Open this page from the Sofa AR app.", true);
+    } else {
+      viewer.alt = "3D model of " + title;
+      viewer.src = id === "astronaut" ? TEST_MODEL : "assets/models/" + id + ".glb";
+    }
+
+    viewer.addEventListener("load", () => {
+      if (!viewer.canActivateAR) {
+        say("AR is not available in this browser. Open this page in Chrome on an Android phone with Google Play Services for AR.", true);
+      }
+    });
+    viewer.addEventListener("error", () => say("The 3D model could not be loaded.", true));
+    viewer.addEventListener("ar-status", (event) => {
+      if (event.detail.status === "failed") say("AR could not start on this phone.", true);
+    });
+  </script>
+</body>
+</html>

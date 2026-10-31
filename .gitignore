@@ -10,3 +10,6 @@ ios/
 *.iml
 .idea/
 pubspec.lock
+.venv/
+__pycache__/
+.pytest_cache/

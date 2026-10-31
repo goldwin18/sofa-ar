@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parent.parent
 IMAGES = ROOT / "assets/images"
 MODELS = ROOT / "assets/models"
 
-# Raise this whenever the models change (and in sample_sofas.dart): new file name = no stale CDN copy.
+# Raise this whenever the models change (and in sample_sofas.dart): new file name = nobody is served a stale copy.
 REVISION = 2
 
 # real-world width of each sofa in metres

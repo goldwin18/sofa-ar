@@ -13,11 +13,10 @@ class AppConstants {
   /// Large photos are shrunk to this before processing, to keep things fast.
   static const maxImageSide = 1024;
 
-  /// Public https folder holding the sample .glb files. Google's AR viewer can only load
-  /// models from an https link. This serves the repo's assets/models folder via jsDelivr,
-  /// so the GitHub repo must be PUBLIC. Change this if you host the models elsewhere.
-  static const hostedModelsBaseUrl =
-      'https://cdn.jsdelivr.net/gh/goldwin18/sofa-ar@main/assets/models';
+  /// The "View in your room" web page. GitHub Pages serves ar.html and assets/models/*.glb
+  /// from the repo root (repo must be public, Pages turned on: see README).
+  /// Change this if you host the page somewhere else.
+  static const arPageUrl = 'https://goldwin18.github.io/sofa-ar/ar.html';
 
   // SharedPreferences keys
   static const prefsUserSofas = 'user_sofas_v1';

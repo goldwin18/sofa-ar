@@ -7,9 +7,9 @@ import 'models/sofa.dart';
 /// assets/models (tool/make_sample_glbs.py can build the .glb), then add a line below.
 /// Widths are real-world metres and must match tool/make_sample_glbs.py.
 ///
-/// MODEL REVISION: the AR viewer downloads the models through a CDN that keeps old copies
-/// for hours. So whenever you change a model, raise [modelRevision] here AND `REVISION` in
-/// tool/make_sample_glbs.py (the file name changes, so the CDN can never serve a stale copy).
+/// MODEL REVISION: browsers and web hosts keep old copies of files for a while. So whenever you
+/// change a model, raise [modelRevision] here AND `REVISION` in tool/make_sample_glbs.py
+/// (the file name changes, so nobody can be served a stale copy).
 class SampleSofas {
   SampleSofas._();
 
